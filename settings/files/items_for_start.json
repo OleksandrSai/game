@@ -1,0 +1,73 @@
+{
+  "weapons": [
+    {
+      "id": "bow_01",
+      "name": "Noob Bow",
+      "item_type": "WEAPON",
+      "slot": "WEAPON",
+      "weapon_type": "BOW",
+      "base_damage": 10.0,
+      "damage_type": "PHYSICAL",
+      "attack_speed": 1.8,
+      "stat_scaling": {
+        "dexterity": 0.6
+      },
+      "bonuses": {
+        "stats": {
+          "dexterity": 2
+        },
+        "crit_damage": 0.1
+      },
+      "description": "Beginner's training bow",
+      "weight": 1.5,
+      "value": 50,
+      "durability": 80
+    },
+    {
+      "id": "sword_02",
+      "name": "Wooden Sword",
+      "item_type": "WEAPON",
+      "slot": "WEAPON",
+      "weapon_type": "SWORD",
+      "base_damage": 8.0,
+      "damage_type": "PHYSICAL",
+      "attack_speed": 1.5,
+      "stat_scaling": {
+        "strength": 0.4
+      },
+      "bonuses": {
+        "stats": {
+          "strength": 1
+        }
+      },
+      "description": "Basic wooden training sword",
+      "weight": 2.0,
+      "value": 30,
+      "durability": 60
+    },
+    {
+      "id": "staff_02",
+      "name": "Light Staff",
+      "item_type": "WEAPON",
+      "slot": "WEAPON",
+      "weapon_type": "STAFF",
+      "base_damage": 12.0,
+      "damage_type": "MAGICAL",
+      "attack_speed": 1.0,
+      "crit_chance": 0.07,
+      "stat_scaling": {
+        "intelligence": 0.7
+      },
+      "bonuses": {
+        "stats": {
+          "intelligence": 3
+        },
+        "crit_damage": 0.15
+      },
+      "description": "Glowing staff for novice mages",
+      "weight": 1.8,
+      "value": 120,
+      "durability": 90
+    }
+  ]
+}

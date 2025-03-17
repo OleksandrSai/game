@@ -1,0 +1,23 @@
+{
+  "base": {
+    "hp": 100,
+    "mp": 50,
+    "hp_per_stamina": 5.0,
+    "mp_per_intelligence": 3.0
+  },
+  "experience": {
+    "base_exp": 1000,
+    "multiplier": 1.2,
+    "level_stat_bonuses": {
+      "1": {"strength": 2, "agility": 1},
+      "2": {"strength": 3, "agility": 2},
+      "3": {"strength": 4, "agility": 3}
+    }
+  },
+  "class_bonuses": {
+    "warrior": {"strength": 5, "defense": 3},
+    "mage": {"intelligence": 7, "mp": 10},
+    "archer": {"agility": 6, "dexterity": 4}
+  },
+  "crit_multiplier": 1
+}
