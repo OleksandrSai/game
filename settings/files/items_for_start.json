@@ -6,7 +6,7 @@
       "item_type": "WEAPON",
       "slot": "WEAPON",
       "weapon_type": "BOW",
-      "base_damage": 10.0,
+      "base_damage": 15.0,
       "damage_type": "PHYSICAL",
       "attack_speed": 1.8,
       "stat_scaling": {
@@ -29,7 +29,7 @@
       "item_type": "WEAPON",
       "slot": "WEAPON",
       "weapon_type": "SWORD",
-      "base_damage": 8.0,
+      "base_damage": 12.0,
       "damage_type": "PHYSICAL",
       "attack_speed": 1.5,
       "stat_scaling": {

@@ -1,7 +1,7 @@
 from dataclasses import asdict, fields
 from typing import List, Iterable
 import json
-from enums import ArmorSlot, CharacterClass, Race
+from enums import ArmorSlot, CharacterClass, Race, ItemType
 from .character_config import CharacterConfig
 from .equipment_system import EquipmentSystem
 from .base_stat import BaseStats
@@ -136,38 +136,8 @@ class Character:
             item_name = item.name if item else "Empty"
             print(f"{slot.name.capitalize():<10} {item_name}")
 
-    @classmethod
-    def from_dict(cls, data: dict, item_manager) -> 'Character':
-        character = cls()
-        character.name = data["name"]
+        print("\nInventory:")
+        for item in self.inventory:
+            if item.item_type == ItemType.MONEY:
+                print(f"{item.name:<20} x{item.value}")
 
-        character.race = Race[data["race"].upper()]
-        character.char_class = CharacterClass[data["class"].upper()]
-
-        character.base_stats = BaseStats(**data["base_stats"])
-
-        character.vital_system.stats = VitalStats(**data["vitals"])
-
-        for slot_str, item_id in data["equipment"].items():
-            if item_id:
-                slot = ArmorSlot[slot_str.upper()]
-                item = item_manager.get_item(item_id)
-                if item:
-                    character.equipment_system.equip_item(item)
-
-        character.inventory = [
-            item_manager.get_item(item_id)
-            for item_id in data["inventory"]
-            if item_manager.get_item(item_id)
-        ]
-
-        character._init_class_stats()
-        character.vital_system.update(character)
-
-        return character
-
-    @classmethod
-    def load(cls, filename: str, item_manager) -> 'Character':
-        with open(filename, 'r') as f:
-            data = json.load(f)
-        return cls.from_dict(data, item_manager)

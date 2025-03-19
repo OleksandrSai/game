@@ -1,5 +1,11 @@
 from enum import Enum, auto
 
+
+class TypeReward(Enum):
+    EXP = auto(),
+    MONEY = auto()
+
+
 class LoadSource(Enum):
     LOCAL = auto()
     API = auto()
@@ -9,6 +15,7 @@ class ItemType(Enum):
     WEAPON = auto()
     ARMOR = auto()
     CONSUMABLE = auto()
+    MONEY = auto()
 
 
 class WeaponType(Enum):

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from character.create_character.director import CharacterDirector
 import random
+from npc.npc import NPC
+from items.item import add_money_to_inventory
 
 
 class GameState(ABC):
@@ -74,20 +76,19 @@ class GameplayState(GameState):
         print("3) Осмотреть себя")
         print("4) Выйти из игры")
 
-        choice = input("Выбери действие [1,2,3]: ")
+        choice = input("Выбери действие [1,2,3,4]: ")
 
         actions = {
-            "1": lambda: print("🌿 Ты осматриваешься вокруг... и видешь одни перспективы для твоего развития"),
-            "2": lambda: controller.change_state(TeleporterState()),  # Переход к Телепортеру
-            "3": controller.char.show_status(),  # Переход к Телепортеру
-            "4": controller.exit
+            "1": print("🌿 Ты осматриваешься вокруг... и видешь одни перспективы для твоего развития"),
+            "2": lambda: controller.change_state(TeleporterState()),
+            "3": print(controller.char.show_status()),
+            "4": lambda: controller.exit
         }
 
         action = actions.get(choice, lambda: print("❌ Ошибка: Действие не распознано!"))
 
-        if choice == "1" or "3":
-            print("\nСпрашиваю еще раз")
-            self.handle(controller)
+        if choice == "1" or choice == "3":
+            controller.change_state(GameplayState())
         else:
             action()
 
@@ -95,53 +96,52 @@ class GameplayState(GameState):
 class TeleporterState(GameState):
     def handle(self, controller):
         print("\n✨ Добро пожаловать, путешественник! Я Телепортер. ✨")
-        print("Я могу отправить тебя в одну из четырех тренировочных зон:")
-        print("1) Лес Древних – место, полное тайн и магии.")
-        print("2) Грозовой Каньон – испытание для самых выносливых.")
-        print("3) Огненные Пещеры – опасное место, полное лавы и монстров.")
-        print("4) Ледяные Пустоши – суровый край вечного холода.")
-        print("5) Вернуться в город.")
+        print("Я могу отправить тебя в одну из тренировочных зон:")
+
+        locations = controller.location
+
+        for num, location_info in locations.items():
+            name = location_info['name']
+            desc = location_info['description']
+            difficulty = location_info['difficulty']
+            print(f"\n{num}) {name} – {desc} (Сложность: {difficulty})")
+
+        print("\n5) Вернуться в город.")
 
         choice = input("Куда хочешь отправиться? [1,2,3,4,5]: ")
 
-        actions = {
-            "1": lambda: self.teleport(controller, "Лес Древних", choice),
-            "2": lambda: self.teleport(controller, "Грозовой Каньон", choice),
-            "3": lambda: self.teleport(controller, "Огненные Пещеры", choice),
-            "4": lambda: self.teleport(controller, "Ледяные Пустоши", choice),
-            "5": lambda: controller.change_state(GameplayState())  # Возвращение в игру
-        }
+        if choice in locations:
+            location_info = locations[choice]
+            name = location_info['name']
+            description = location_info['description']
+            difficulty = location_info['difficulty']
 
-        action = actions.get(choice)
-        if action:
-            action()
+            npc_info = location_info['npc']
+            npc = NPC(npc_info['name'], npc_info['hp'])
+
+            events = location_info.get('events', [])
+
+            self.teleport(controller, name, description, difficulty, npc, events)
+        elif choice == "5":
+            controller.change_state(GameplayState())
         else:
             print("❌ Ошибка: Такой зоны нет! Попробуй снова.")
             self.handle(controller)
 
-    def teleport(self, controller, location, choice):
+    def teleport(self, controller, location, description, difficulty, npc, events):
         print(f"🌟 Телепортирую в {location}... Добро пожаловать! 🌟")
-        actions = {
-            "1": lambda: controller.change_state(AncientForestState()),
-            "2": lambda: controller.change_state(ThunderCanyonState()),
-            "3": lambda: controller.change_state(FireCavesState()),
-            "4": lambda: controller.change_state(IceWastesState()),
-            "5": lambda: controller.change_state(GameplayState())
-        }
-
-        actions.get(choice)()
+        controller.change_state(ExplorationState(location, npc, description, difficulty, events))
 
 
 class BattleState(GameState):
     def __init__(self, monster_name, monster_hp):
-        self.monster_name = monster_name
-        self.monster_hp = monster_hp
+        self.npc = NPC(monster_name, monster_hp)
 
     def handle(self, controller):
-        print(f"\n⚔️ Ты вступаешь в бой с {self.monster_name}! ⚔️")
-        print(f"У {self.monster_name} {self.monster_hp} HP!")
+        print(f"\n⚔️ Ты вступаешь в бой с {self.npc.name}! ⚔️")
+        print(f"У {self.npc.name} {self.npc.hp} HP!")
 
-        while self.monster_hp > 0:
+        while self.npc.hp > 0:
             print("\n1) Атаковать 🗡️")
             print("2) Бежать 🏃‍♂️")
 
@@ -149,19 +149,21 @@ class BattleState(GameState):
 
             if choice == "1":
                 damage = int(controller.char.attack_damage)
-                self.monster_hp -= damage
-                print(f"Твое здоровье {controller.char.current_hp}")
-                print(f"💥 Ты нанес {damage} урона! У {self.monster_name} осталось {max(self.monster_hp, 0)} HP!")
-                mob_damage = random.randint(1, 500)
+                self.npc.hp -= damage
+                print(f"Твое здоровье {controller.char.current_hp} HP")
+                print(f"\n🔥  Ты нанес {damage} урона! У {self.npc.name} осталось {self.npc.hp} HP!")
+                mob_damage = self.npc.give_damage()
                 controller.char.take_damage(mob_damage)
 
-                print(f"\n💥 {self.monster_name} нанес тебе {mob_damage}")
+                print(f"\n💥 {self.npc.name} нанес тебе {mob_damage}")
                 if not controller.char.current_hp:
                     print(f"Ты погиб, твое HP ==  {controller.char.current_hp}")
-                    print(f"Возвращаю в город")
+                    print(f"Возвращаю в город 🏙️")
                     controller.change_state(GameplayState())
-                if self.monster_hp <= 0:
-                    print(f"🎉 Ты победил {self.monster_name}! 🏆")
+                if self.npc.hp <= 0:
+                    print(f"🎉 Ты победил {self.npc.name}! 🏆")
+                    # Победа над монстром - получаем случайную награду
+                    self.reward_player(controller)
                     controller.change_state(GameplayState())
                     return
             elif choice == "2":
@@ -171,114 +173,49 @@ class BattleState(GameState):
             else:
                 print("❌ Ошибка: Действие не распознано!")
 
+    def reward_player(self, controller):
+        money_reward = random.randint(500, 1500)
+        exp_reward = random.randint(20, 100)
+        controller.char.gain_exp(exp_reward)
+        add_money_to_inventory(controller, money_reward)
 
-class AncientForestState(GameState):
+        print(f"🎉 Ты получил {money_reward} 💰 монет и {exp_reward} ✨ опыта!")
+
+
+class ExplorationState(GameState):
+    def __init__(self, location_name, npc, description, difficulty, events):
+        self.location_name = location_name
+        self.npc = npc
+        self.description = description
+        self.difficulty = difficulty
+        self.events = events
+
     def handle(self, controller):
-        print("\n🌲 Ты попал в Лес Древних – место магии и тайн.")
-        print("1) Исследовать лес")
-        print("2) Сразиться с Древним Духом 👻")
+        print(f"\n🌍 {self.location_name} – исследуй и сражайся!")
+        print(f"Описание: {self.description}")
+        print(f"Сложность: {self.difficulty}")
+
+        print("\n1) Осмотреться")
+        print(f"2) Сразиться с {self.npc.name}")
         print("3) Вернуться в город")
 
         choice = input("Выбери действие [1,2,3]: ")
 
         actions = {
-            "1": self.explore_forest,
-            "2": lambda: controller.change_state(BattleState("Древний Дух", 30)),
+            "1": lambda: self.explore(controller),
+            "2": lambda: controller.change_state(BattleState(self.npc.name, self.npc.hp)),
             "3": lambda: controller.change_state(GameplayState())
         }
 
         action = actions.get(choice, lambda: print("❌ Ошибка: Действие не распознано!"))
         action()
 
-    def explore_forest(self, controller):
-        events = [
-            "🌿 Ты нашел древний амулет, он испускает слабый свет!",
-            "🦉 Ты услышал шепот деревьев, но не разобрал слов...",
-            "🐺 Из кустов выбежал волк! К счастью, он тебя не заметил.",
-            "🔮 Ты обнаружил алтарь магии, твои силы немного восстановились!"
-        ]
-        print(random.choice(events))
-
-
-class ThunderCanyonState(GameState):
-    def handle(self, controller):
-        print("\n⛈ Ты оказался в Грозовом Каньоне – испытание для выносливых.")
-        print("1) Осмотреться")
-        print("2) Сразиться с Громовым Великаном ⚡")
-        print("3) Вернуться в город")
-
-        choice = input("Выбери действие [1,2,3]: ")
-
-        actions = {
-            "1": self.explore_canyon,
-            "2": lambda: controller.change_state(BattleState("Громовой Великан", 40)),
-            "3": lambda: controller.change_state(GameplayState())
-        }
-
-        action = actions.get(choice, lambda: print("❌ Ошибка: Действие не распознано!"))
-        action()
-
-    def explore_canyon(self, controller):
-        events = [
-            "⚡ Молния ударила в камень рядом с тобой – будь осторожен!",
-            "🏺 Ты нашел древний сосуд с неизвестной жидкостью.",
-            "🌀 Ветер усиливается, тебя начинает сносить с тропы!",
-            "💎 Под камнем ты обнаружил маленький драгоценный камень."
-        ]
-        print(random.choice(events))
-
-
-class FireCavesState(GameState):
-    def handle(self, controller):
-        print("\n🔥 Ты попал в Огненные Пещеры – здесь жарко и опасно!")
-        print("1) Войти глубже в пещеры")
-        print("2) Сразиться с Огненным Демоном 🔥")
-        print("3) Вернуться в город")
-
-        choice = input("Выбери действие [1,2,3]: ")
-
-        actions = {
-            "1": self.explore_cave,
-            "2": lambda: controller.change_state(BattleState("Огненный Демон", 50)),
-            "3": lambda: controller.change_state(GameplayState())
-        }
-
-        action = actions.get(choice, lambda: print("❌ Ошибка: Действие не распознано!"))
-        action()
-
-    def explore_cave(self, controller):
-        events = [
-            "🔥 Ты нашел старый меч, опаленный пламенем.",
-            "💀 В пещере лежат кости, чей-то последний поход...",
-            "💎 Ты обнаружил рубин, мерцающий в темноте!",
-            "🌋 Земля дрожит – кажется, скоро начнется извержение!"
-        ]
-        print(random.choice(events))
-
-
-class IceWastesState(GameState):
-    def handle(self, controller):
-        print("\n❄️ Ты оказался в Ледяных Пустошах – суровом краю вечного холода.")
-        print("1) Разведать местность")
-        print("2) Сразиться с Ледяным Големом ❄️")
-        print("3) Вернуться в город")
-
-        choice = input("Выбери действие [1,2,3]: ")
-
-        actions = {
-            "1": self.explore_ice_wastes,
-            "2": lambda: controller.change_state(BattleState("Ледяной Голем", 35)),
-            "3": lambda: controller.change_state(GameplayState())
-        }
-
-        action = actions.get(choice, lambda: print("❌ Ошибка: Действие не распознано!"))
-        action()
-
-    def explore_ice_wastes(self, controller):
-        events = [
-            "🧊 Лед треснул под твоими ногами, но ты успел увернуться!",
-            "🥶 Вдалеке ты заметил таинственный силуэт, но он исчез...",
-            "🦴 Ты нашел останки древнего существа.",
-            "🌟 Среди снегов ты обнаружил сверкающий ледяной кристалл."
-        ]
-        print(random.choice(events))
+    def explore(self, controller):
+        print(f"\n{random.choice(self.events)}")
+        controller.change_state(ExplorationState(self.location_name,
+                                                 self.npc,
+                                                 self.description,
+                                                 self.difficulty,
+                                                 self.events
+                                                 )
+                                )

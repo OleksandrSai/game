@@ -15,7 +15,7 @@ class LocalConfigLoader(ConfigLoader):
 
     def load(self) -> Dict[str, Any]:
         try:
-            with open(self.filename) as f:
+            with open(self.filename, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise ValueError(f"Error loading local config: {str(e)}") from e

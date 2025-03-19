@@ -19,3 +19,9 @@ class GameConfigManager:
             level_stat_bonuses=config_data['experience']['level_stat_bonuses'],
             class_bonuses=config_data['class_bonuses'],
         )
+
+    @staticmethod
+    def load_location(source: LoadSource, location: str):
+        loader = ConfigLoaderFactory.create_loader(source, location)
+        location = loader.load()
+        return location

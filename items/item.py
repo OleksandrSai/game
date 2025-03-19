@@ -42,3 +42,17 @@ class Item:
                 amount = int(effect.split(":")[1])
                 character.vital_system.restore_mana(amount)
         return True
+
+
+def add_money_to_inventory(controller, money_reward):
+    money_item = Item(
+        id="money_001",
+        name="Золотые монеты",
+        item_type=ItemType.MONEY,
+        description="Монеты, используемые для обмена и покупки товаров.",
+        weight=0.01,
+        value=money_reward,  # Устанавливаем количество монет, переданное извне
+        stackable=True,
+        max_stack=10000,
+    )
+    controller.char.inventory.append(money_item)

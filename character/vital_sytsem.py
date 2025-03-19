@@ -7,8 +7,8 @@ class VitalStats:
     level: int = 1
     exp: int = 0
     exp_to_next: int = 100
-    max_hp: int = 100
-    current_hp: int = 100
+    max_hp: int = 500
+    current_hp: int = 500
     max_mp: int = 50
     current_mp: int = 50
 

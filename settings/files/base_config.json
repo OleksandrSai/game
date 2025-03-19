@@ -1,6 +1,6 @@
 {
   "base": {
-    "hp": 100,
+    "hp": 800,
     "mp": 50,
     "hp_per_stamina": 5.0,
     "mp_per_intelligence": 3.0
