@@ -16,6 +16,7 @@ class MainMenuState(GameState):
         print(f"Добро пожаловать, {controller.user if controller.user else 'Игрок'}!")
         print("1) Авторизоваться\n2) Выйти")
         choice = input("> ")
+        # Input/Output должен быть дополнительным уровнем абстракции. Может быть стоило сделать Bridge хоть самый упрощенный
 
         actions = {
             "1": lambda: controller.change_state(AuthState()),

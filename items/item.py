@@ -41,6 +41,7 @@ class Item:
             elif effect.startswith("mana:"):
                 amount = int(effect.split(":")[1])
                 character.vital_system.restore_mana(amount)
+            # Логично сделать Heal и Mana отдельными подкласами, чтобы убрать эту if-else ladder
         return True
 
 

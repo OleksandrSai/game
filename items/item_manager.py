@@ -13,6 +13,7 @@ class ItemManager:
     def load_from_json(self, file_path: str) -> None:
         with open(file_path, 'r') as f:
             data = json.load(f)
+        # Хорошо было бы отделить в ItemsProvider, чтобы скрыть детали реализации, что это json-файлы
 
         for item_data in data.get("items", []):
             self._parse_item(item_data)
