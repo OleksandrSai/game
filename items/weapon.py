@@ -28,6 +28,7 @@ class WeaponLoader:
     def load_from_config(file_path: str) -> List[Weapon]:
         with open(file_path, 'r') as f:
             config = json.load(f)
+        # WeaponProvider
 
         weapons = []
         for weapon_data in config.get("weapons", []):

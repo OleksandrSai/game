@@ -21,6 +21,7 @@ class LevelingSystem(CharacterComponent):
         self._update_exp_threshold(character)
         self._apply_stat_bonuses(character)
         character.vital_system.update(character)
+        # Могли бы доделать до Observer
 
     def _update_exp_threshold(self, character: 'Character'):
         character.vital_system.stats.exp_to_next = int(

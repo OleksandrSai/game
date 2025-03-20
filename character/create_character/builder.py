@@ -27,3 +27,5 @@ class CharacterBuilder:
 
     def build(self):
         return self.character
+
+    # Нужен reset
